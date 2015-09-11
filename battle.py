@@ -44,19 +44,12 @@ class Board:
 class Ship:
     """ Create a ship """
     def __init__(self, shape): #shape is a multiline string
-        self.shape = shape.strip('\n').split('\n')
-        self.rows, self.longest = len(self.shape), len(max(self.shape))
-        self._extendShort()
-
-    def _extendShort(self):
-        """ Extend shorter rows with spaces to equal longest """
-        for i in range(self.rows):
-            self.shape[i] += " " * (self.longest - len(self.shape[i]))
+        self._shape = shape.strip('\n').split('\n')
             
-    def getCoords(self):
+    def coords(self):
         """ Return relative coordinates of shape """
-        coords = []
-        for y, row in enumerate(self.shape):
+        coords = list()
+        for y, row in enumerate(self._shape):
             for x, c in enumerate(row):
                 if c == "#":
                     coords.append((x, y))
@@ -70,4 +63,4 @@ s = """
  ###
 """
 ship = Ship(s)
-print(ship.getCoords())
+print(ship.coords())
