@@ -36,23 +36,24 @@ class Map(list):
         for row in range(rows):
             self.append([])
             for column in range(columns):
-                self[row].append([])
+                self[row].append('')
 
 class Ocean(Map):
     """ Create the ocean, ie. the actual game board to display """
     def __init__(self):
         super().__init__()
         for row in self:
-            for column in row:
-                column.append(random.choice(WAVE))
+            for i, column in enumerate(row):
+                row[i] = random.choice(WAVE)
 
     def __str__(self):
         """ Map's string representation for debug purposes """
-        return '\n'.join(map(lambda lst: ''.join([l[0] for l in lst]), self))
+        return '\n'.join([self.get(row) for row in range(len(self))])
+        #return '\n'.join(map(lambda row: ''.join([c for c in row]), self))
 
     def get(self, row):
         """ Return row of ocean as string """
-        return ''.join([field[0] for field in self[row]])
+        return ''.join(self[row])
 
 class Master(Map):
     """ Master map containing ships """
@@ -128,12 +129,12 @@ class BattleShip:
         """ Init new game """
         self.ocean = Ocean()
         print(self.ocean)
-        print(self.ocean[0][0][0])
-        self.master = Master()
-        self.board = Board(self.ocean)
-        self.ships = [Ship(ship) for ship in SHIPS]
-        self.master.add(self.ships[0], 0, 0)
-        #print(self.master)
+##        print(self.ocean[0][0][0])
+##        self.master = Master()
+##        self.board = Board(self.ocean)
+##        self.ships = [Ship(ship) for ship in SHIPS]
+##        self.master.add(self.ships[0], 0, 0)
+##        print(self.master)
 
     def newGame(self):
         """ Start new game """
