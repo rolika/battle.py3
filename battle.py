@@ -2,7 +2,7 @@
 
 import random
 
-WAVE, BODY, HIT, MISS, SUNKEN = "~˛", '#', '+', 'o', '×'
+WAVE, VESSEL, HIT, MISS, SUNKEN = "~˛", '#', '+', 'o', '×'
 SHIPS = [ \
 """
 ###   ###
@@ -24,13 +24,20 @@ SHIPS = [ \
   ###
 ######
  ###
-""" ]
+""" ,
+"""
+ ####
+##  ###
+##   ###
+##  ###
+ ####
+"""]
 
 class Map(list):
     """ Base class to create a list of list holding the maps for:
         - ocean representing game field
         - master map holding the ships position """
-    def __init__(self, rows = 20, columns = 40):
+    def __init__(self, rows = 17, columns = 40):
         super().__init__()
         self.rows, self.columns = rows, columns
         for row in range(rows):
@@ -62,7 +69,14 @@ class Master(Map):
     def add(self, ship, x, y):
         """ Place ship on master map at given coordinates """
         for sx, sy in ship:
-            self[sy + y][sx + x] = BODY
+            self[sy + y][sx + x] = VESSEL
+
+    def empty(self, ship, x, y):
+        """ Check if ship can placed there """
+        for sx, sy in ship:
+            if self[sy + y][sx + x] == VESSEL:
+                return False
+        return True
 
 class Board:
     """ Create game board based on ocean """
@@ -90,7 +104,7 @@ class Ship(list):
         self._shape = shape.strip('\n').split('\n')
         for y, row in enumerate(self._shape): #get coords of ship-tiles
             for x, c in enumerate(row):
-                if c == BODY:
+                if c == VESSEL:
                     self.append((x, y))
         self.wide = len(self._shape) #wide & long for placing on map
         self.long = max(self)[0]
@@ -107,13 +121,34 @@ class BattleShip:
         self.ocean = Ocean()
         self.master = Master()
         self.board = Board(self.ocean)
-        self.ships = [Ship(ship) for ship in SHIPS]
-        self.master.add(self.ships[0], 1, 1)
-        print(self.master)
+        self.ships = [Ship(ship) for ship in SHIPS]        
+        for ship in self.ships: #add ships to master map
+            while True:
+                x = random.randrange(self.master.columns - ship.long)
+                y = random.randrange(self.master.rows - ship.wide)
+                if self.master.empty(ship, x, y):
+                    break
+            self.master.add(ship, x, y)
+        self.torpedos = sum([ship.count for ship in self.ships]) * 3
 
     def newGame(self):
         """ Start new game """
         print("{:_^48}".format(' '.join(list("torpedó".upper()))))
-        self.board.draw()
+        while self.torpedos:
+            self.board.draw()
+            print("{} torpedód van.".format(self.torpedos), end = " ")
+            try:
+                x, y = input("Add meg a célkoordinátákat 0-{} 0-{}: ". \
+                   format(self.master.columns - 1, self.master.rows - 1)). \
+                   split()
+                x, y = int(x), int(y)
+            except:
+                continue #not two-part string, not integers
+            if x not in range(self.master.columns) or \
+               y not in range(self.master.rows):
+                continue #values not in range
+            print("Korrekt értékek")
+            break
 
-app = BattleShip()
+if __name__ == "__main__":
+    app = BattleShip()
