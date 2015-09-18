@@ -134,18 +134,18 @@ class BattleShip:
     def newGame(self):
         """ Start new game """
         print("{:_^48}".format(' '.join(list("torpedó".upper()))))
-        while self.torpedos:
+        while True: #main game loop
             self.board.draw()
             print("{} torpedód van.".format(self.torpedos), end = " ")
             try:
-                x, y = input("Add meg a célkoordinátákat 0-{} 0-{}: ". \
+                y, x = input("Add meg a célkoordinátákat 0-{} 0-{}: ". \
                    format(self.master.columns - 1, self.master.rows - 1)). \
                    split()
                 x, y = int(x), int(y)
             except:
                 continue #not two-part string, not integers
-            if x not in range(self.master.columns) or \
-               y not in range(self.master.rows):
+            if x not in range(self.master.rows) or \
+               y not in range(self.master.columns):
                 continue #values not in range
             print("Korrekt értékek")
             break
