@@ -14,15 +14,15 @@ SHIPS = [ \
 """
 ##
 ##
-"""]#,
-##"""
-#####
-##""",
-##"""
+""",
+"""
 ###
-###
-###
-##"""]
+""",
+"""
+#
+#
+#
+"""]
 
 class Map(list):
     def __init__(self, rows = 17, columns = 40):
@@ -103,13 +103,13 @@ class BattleShip:
     """ Main game application """
     def __init__(self):
         self.init_game()
-        for ship in self.ships: #debug
-            self.ocean.add(ship)
+##        for ship in self.ships: #debug
+##            self.ocean.add(ship)
         self.new_game()
 
     def init_game(self):
         """ Init new game """
-        self.ocean = Map(5, 10)
+        self.ocean = Map(10, 10)
         self.board = Board(self.ocean)
         self.torpedos = 0
         self.ships = [Ship(ship) for ship in SHIPS]
