@@ -1,43 +1,28 @@
+#! /usr/bin/env python3
 #BattleShip game on console
 
 import random
 
-WAVE, VESSEL, HIT, MISS, SUNKEN = "~˛", '#', '+', 'o', '×'
+WIDTH = 80 #terminal window character width
+WAVE, VESSEL, HIT, MISS = "~˛", '#', 'X', 'O'
 SHIPS = [ \
 """
-###   ###
-  #####
-  #####
-###   ###
+ #
+###
+ #
 """,
 """
-   ###
- #######
-#########
-""",
-"""
-#######
-#######
-#######
-""",
-"""
-  ###
-######
- ###
-""" ,
-"""
- ####
-#######
-########
-#######
- ####
-""",
-"""
-#######
-#     #
-#     #
-#######
-"""]
+##
+##
+"""]#,
+##"""
+#####
+##""",
+##"""
+###
+###
+###
+##"""]
 
 class Map(list):
     def __init__(self, rows = 17, columns = 40):
@@ -79,20 +64,22 @@ class Board:
     """ Create game board based on ocean """
     def __init__(self, ocean): #takes ocean as object
         self._ocean = ocean
-        self._full_row = " {:>2} {} {}" #left row-num, ocean-row, right row-num
+        self._full_row = "{}{:>2} {} {}" #left row-num, ocean-row, right row-num
         self._horizontal_nums = \
-            ''.join([str(num % 10) for num in range(ocean.columns)])
-        self._horizontal_tens = \
-            (' ' * 9).join([str(num) for num in range(ocean.columns // 10)])
+            ''.join([str(num % 10) for num in range(self._ocean.columns)])
+        self._horizontal_tens = (' ' * 9).join([str(num) \
+                                for num in range(self._ocean.columns // 10)])
+        self.offset = " " * ((WIDTH - self._ocean.columns - 6) // 2)
 
     def draw(self):
         """ Draw board with coordinates around """
-        print(self._full_row.format("", self._horizontal_tens, ""))
-        print(self._full_row.format("", self._horizontal_nums, ""))
+        print(self._full_row.format(self.offset, "", self._horizontal_tens, ""))
+        print(self._full_row.format(self.offset, "", self._horizontal_nums, ""))
         for row in range(self._ocean.rows):
-            print(self._full_row.format(row, self._ocean.get(row), row))
-        print(self._full_row.format("", self._horizontal_nums, ""))
-        print(self._full_row.format("", self._horizontal_tens, ""))
+            print(self._full_row.format(self.offset,
+                                        row, self._ocean.get(row), row))
+        print(self._full_row.format(self.offset, "", self._horizontal_nums, ""))
+        print(self._full_row.format(self.offset, "", self._horizontal_tens, ""))
 
 class Ship(dict):
     """ Create a ship with its coordinates """
@@ -109,33 +96,31 @@ class Ship(dict):
                 if c == VESSEL:
                     coords.append([x, y])
         self.wide = len(shape) #wide & long for placing on map
-        self.long = max(max(zip(*coords))) + 1
+        self.long = max(max(zip(*coords))) + 1 #highest number in a list of lists
         return coords
-
-    def check(self):
-        """ Check if ship sunken - all vessel parts hit """
-        return False if VESSEL in self.values() else True
 
 class BattleShip:
     """ Main game application """
     def __init__(self):
         self.init_game()
-        for ship in self.ships:
+        for ship in self.ships: #debug
             self.ocean.add(ship)
-        print(self.ocean)
         self.new_game()
 
     def init_game(self):
         """ Init new game """
-        self.ocean = Map()
+        self.ocean = Map(5, 10)
         self.board = Board(self.ocean)
+        self.torpedos = 0
         self.ships = [Ship(ship) for ship in SHIPS]
         for ship in self.ships:
             self.add(ship)
-        self.torpedos = 3
+            self.torpedos += len(ship)
+        self.message = "{} hajó van az óceánon.".format(len(self.ships))
+        self.torpedos *= 2 #all ship-parts × 2
 
     def add(self, ship):
-        """ Add ship to ocean, i.e. translate its coordinates """
+        """ Add ship to ocean randomly, i.e. translate its coordinates """
         while True:
             x = random.randrange(self.ocean.rows - ship.wide)
             y = random.randrange(self.ocean.columns - ship.long)
@@ -153,29 +138,72 @@ class BattleShip:
                     return True
         return False
 
+    def ask(self):
+        """ Ask for coordinates and validate entry """
+        while True:
+            coords = input("Add meg a célkoordinátákat 0-{} 0-{}: ".\
+                           format(self.ocean.columns - 1,
+                                  self.ocean.rows - 1))
+            if "vége" in coords:
+                quit("Vége a játéknak.")
+            coords = coords.split()
+            if len(coords) != 2:
+                print("Két koordinátát kérek!")
+                continue
+            try:
+                x, y = int(coords[1]), int(coords[0])
+            except:
+                print("Két pozitív egész számot kérek!")
+                continue
+            break
+        return x, y
+        
     def new_game(self):
         """ Start new game """
         while True: #main game loop
-            print("{:_^48}".format(' '.join(list("torpedó".upper()))))
+            print("{:_^80}".format(' '.join(list("torpedó".upper()))))
             self.board.draw()
-            print("{} torpedód van.".format(self.torpedos), end = " ")
-            try:
-                y, x = input("Add meg a célkoordinátákat 0-{} 0-{}: ". \
-                   format(self.master.columns - 1, self.master.rows - 1)). \
-                   split()
-                x, y = int(x), int(y)
-            except:
-                continue #not two-part string, not integers
-            if x not in range(self.master.rows) or \
-               y not in range(self.master.columns):
+            print("{} {} torpedód van.".format(self.message, self.torpedos))
+            if not self.torpedos:
+                break
+            x, y = self.ask()
+            if x not in range(self.ocean.rows) or \
+               y not in range(self.ocean.columns):
+                self.message = "A torpedó az óceánon kívül csapódna be..."
                 continue #values not in range
-            print("Korrekt értékek")
-            break
+            self.torpedos -= 1
+            for ship in self.ships:
+                hit = ship.get((x, y), False) == VESSEL
+                if hit:
+                    break
+            if hit:
+                ship[(x, y)] = self.ocean[x][y] = HIT #mark both as hit
+                self.message = "Eltaláltál egy hajót!"
+                if VESSEL not in ship.values(): #no intact part left
+                    self.message = "Elsüllyesztetted az egész hajót!"
+                    self.ships.remove(ship)
+                continue
+            if self.ocean[x][y] in WAVE:
+                self.message = "Nem talált!"
+                self.ocean[x][y] = MISS
+                continue
+            elif self.ocean[x][y] == HIT:
+                self.message = "Itt már meglőttél egy hajót!"
+                continue
+            elif self.ocean[x][y] == MISS:
+                self.message = "Itt már az előbb sem volt semmi..."
+                continue
+            if len(self.ships) == 0:
+                self.board.draw()
+                print("Gratulálok, az összes hajót elsüllyesztetted!")
+                break
+            if self.torpedos < 0:
+                print("Nincs több torpedód!")
+                break
+        print("Vége a játéknak.")
 
-def test():
-    s = Ship(SHIPS[4])
-    print(s.coords)
+def main():
+    game = BattleShip()
 
 if __name__ == "__main__":
-    app = BattleShip()
-    #test()
+    main()
