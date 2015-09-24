@@ -187,10 +187,10 @@ class BattleShip:
                 self.message = "Nem talált!"
                 self.ocean[x][y] = MISS
                 continue
-            elif self.ocean[x][y] == HIT:
+            if self.ocean[x][y] == HIT:
                 self.message = "Itt már meglőttél egy hajót!"
                 continue
-            elif self.ocean[x][y] == MISS:
+            if self.ocean[x][y] == MISS:
                 self.message = "Itt már az előbb sem volt semmi..."
                 continue
             if len(self.ships) == 0:
