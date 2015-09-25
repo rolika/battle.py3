@@ -179,17 +179,14 @@ class BattleShip:
                 if VESSEL not in ship.values(): #no intact part left
                     self.message = "Elsüllyesztetted az egész hajót!"
                     self.ships.remove(ship)
-                continue
-            if self.ocean[x][y] in WAVE:
+            elif self.ocean[x][y] in WAVE:
                 self.message = "Nem talált!"
                 self.ocean[x][y] = MISS
-                continue
-            if self.ocean[x][y] == HIT:
+            elif self.ocean[x][y] == HIT:
                 self.message = "Itt már meglőttél egy hajót!"
-                continue
-            if self.ocean[x][y] == MISS:
+            elif self.ocean[x][y] == MISS:
                 self.message = "Itt már az előbb sem volt semmi..."
-                continue
+            continue
             if len(self.ships) == 0:
                 self.board.draw()
                 print("Gratulálok, az összes hajót elsüllyesztetted!")
