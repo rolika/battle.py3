@@ -190,10 +190,9 @@ class BattleShip:
             if len(self.ships) == 0:
                 self.board.draw()
                 print("Gratulálok, az összes hajót elsüllyesztetted!")
-                break
-            if self.torpedos < 0:
+            elif self.torpedos < 0:
                 print("Nincs több torpedód!")
-                break
+            break
         print("Vége a játéknak.")
 
 def main():
