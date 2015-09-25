@@ -169,11 +169,13 @@ class BattleShip:
                 self.message = "A torpedó az óceánon kívül csapódna be..."
                 continue #values not in range
             self.torpedos -= 1
-            for ship in self.ships:
-                hit = ship.get((x, y), False) == VESSEL
-                if hit:
-                    break
-            if hit:
+            try:
+                ship = next(filter(lambda ship:\
+                                   ship.get((x, y), False) == VESSEL,
+                                   self.ships))
+            except:
+                ship = False
+            if ship:
                 ship[(x, y)] = self.ocean[x][y] = HIT #mark both as hit
                 self.message = "Eltaláltál egy hajót!"
                 if VESSEL not in ship.values(): #no intact part left
