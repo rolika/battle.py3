@@ -50,11 +50,8 @@ class Map(list):
 
     def add(self, ship):
         """ Place ship on map for debug purposes """
-        try:
-            for coord in ship:
+        for coord in ship:
                 self[coord[0]][coord[1]] = VESSEL
-        except:
-            print(ship.coords)
 
     def __str__(self):
         """ Map's string representation for debug purposes """
